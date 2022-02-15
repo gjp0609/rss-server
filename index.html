@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>RSS Reader</title>
+        <script src="./lib/vue/vue.2.6.14.min.js"></script>
+        <script src="./lib/sqlite/sql-wasm.js"></script>
+        <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
+        <style>
+            body {
+                grid-template-columns: 1fr min(80rem, 90%) 1fr;
+            }
+            #app {
+            }
+            p {
+                text-indent: 2rem;
+            }
+
+            img {
+                display: block;
+                margin: 0 auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <div v-for="line of result" @click="showOrHide(line)">
+                <h5>{{line.TITLE}}</h5>
+                <code>{{dateFormat(line.TIME)}}</code>
+                <p v-show="line.show" v-html="line.CONTENT"></p>
+                <hr />
+            </div>
+        </div>
+    </body>
+    <script>
+        new Vue({
+            el: '#app',
+            data: () => {
+                return {
+                    db: undefined,
+                    keyword: '',
+                    result: []
+                };
+            },
+            mounted() {
+                const sqlPromise = initSqlJs({
+                    locateFile: (file) => `./lib/sqlite/${file}`
+                });
+                const dataPromise = fetch('./db/solidot.db').then((res) => res.arrayBuffer());
+                Promise.all([sqlPromise, dataPromise]).then((result) => {
+                    let SQL = result[0];
+                    let buf = result[1];
+                    this.db = new SQL.Database(new Uint8Array(buf));
+                    this.query();
+                });
+            },
+            methods: {
+                getUrl(path) {
+                    return this.server + path.replaceAll(/\\/g, '/');
+                },
+                query() {
+                    const stmt = this.db.prepare(`select * from data order by TIME desc`);
+                    this.result = [];
+                    while (stmt.step()) {
+                        const row = stmt.getAsObject();
+                        this.result.push(Object.assign({ show: false }, row));
+                    }
+                },
+                showOrHide(line) {
+                    if (line.show) {
+                        line.show = false;
+                    } else {
+                        for (let resultElement of this.result) {
+                            resultElement.show = resultElement.TIME === line.TIME;
+                        }
+                    }
+                },
+                dateFormat(timestamp) {
+                    let time = new Date(parseInt(timestamp));
+                    return (
+                        time.getFullYear() +
+                        '-' +
+                        (time.getMonth() + 1 < 10 ? '0' : '') +
+                        (time.getMonth() + 1) +
+                        '-' +
+                        (time.getDate() < 10 ? '0' : '') +
+                        time.getDate() +
+                        ' ' +
+                        (time.getHours() < 10 ? '0' : '') +
+                        time.getHours() +
+                        ':' +
+                        (time.getMinutes() < 10 ? '0' : '') +
+                        time.getMinutes() +
+                        ':' +
+                        (time.getSeconds() < 10 ? '0' : '') +
+                        time.getSeconds()
+                    );
+                }
+            }
+        });
+    </script>
+</html>
