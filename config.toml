@@ -1,0 +1,19 @@
+[sources]
+
+[sources.solidot]
+enable = true
+name = "Solidot"
+frequency = 12 # hour
+url = "https://www.solidot.org/index.rss"
+
+[sources.appinn]
+enable = true
+name = "Appinn"
+frequency = 12 # hour
+url = "https://feeds.appinn.com/appinns/"
+
+[sources.zhihu]
+enable = true
+name = "Zhihu"
+frequency = 2 # hour
+url = "https://www.zhihu.com/rss"

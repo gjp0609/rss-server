@@ -1,0 +1,27 @@
+{
+    "name": "rss-server",
+    "version": "1.0.0",
+    "description": "rss-server",
+    "main": "index.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/onysakura/rss-server.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/gjp0609/rss-server/issues"
+    },
+    "homepage": "https://github.com/gjp0609/rss-server#readme",
+    "dependencies": {
+        "@ltd/j-toml": "^1.29.0",
+        "@octokit/action": "^3.7.1",
+        "axios": "^0.21.1",
+        "cheerio": "^0.22.0",
+        "https-proxy-agent": "^5.0.0"
+    },
+    "devDependencies": {
+        "prettier": "^2.5.1"
+    }
+}
