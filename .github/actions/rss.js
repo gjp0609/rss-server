@@ -17,12 +17,12 @@ let db;
 Promise.all([sqlPromise]).then((result) => {
     console.log('sqlite init done.');
     SQL = result[0];
-    init().catch((e) => {
+    init(new Date()).catch((e) => {
         console.log('init error', e);
     });
 });
 
-async function init() {
+async function init(now) {
     let filePath = path.resolve(rootPath, 'config.toml');
     console.log('config file path:', filePath);
     let buffer = fs.readFileSync(filePath);
@@ -31,12 +31,14 @@ async function init() {
     for (let key of Object.keys(config.sources)) {
         let source = config.sources[key];
         if (source.enable) {
-            let dbPath = path.resolve(rootPath, 'db', key + '.db');
-            console.log(`${source.name} db path: ${dbPath}`);
-            let buf = fs.readFileSync(dbPath);
-            db = new SQL.Database(new Uint8Array(buf));
-            await get(source.url);
-            fs.writeFileSync(dbPath, Buffer.from(db.export()));
+            if (now.getHours() % parseInt(source.frequency) === 0) {
+                let dbPath = path.resolve(rootPath, 'db', key + '.db');
+                console.log(`${source.name} db path: ${dbPath}`);
+                let buf = fs.readFileSync(dbPath);
+                db = new SQL.Database(new Uint8Array(buf));
+                await get(source.url);
+                fs.writeFileSync(dbPath, Buffer.from(db.export()));
+            }
         }
     }
 }
